@@ -1,0 +1,36 @@
+name: Jekyll deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ master ]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    environment:
+      name: github-pages
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/configure-pages@v3
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.2'
+        bundler-cache: true
+        cache-version: 0
+    - run: bundle exec jekyll build --baseurl gpt-analytics.gpt-partners.com
+      env:
+        JEKYLL_ENV: production
+    - run: echo 'gpt-partners.com' > ./_site/CNAME 
+    - uses: actions/upload-pages-artifact@v1
+      with:
+        path: '_site'
+    - uses: actions/deploy-pages@v1
